@@ -97,6 +97,44 @@ generation tasks.
 [Retrieved 5 chunk(s) for this question]
 ```
 
+## Day 6 — RAGAS Evaluation Pipeline
+
+`main6.py` runs an automated evaluation of the RAG pipeline using [RAGAS](https://docs.ragas.io/) metrics against 10 quantum error correction questions with known reference answers.
+
+### Setup
+
+```bash
+pip install ragas datasets langchain-groq
+```
+
+### Run
+
+```bash
+python main6.py
+```
+
+Results are saved to `evaluation_results.json`.
+
+### Evaluation Results
+
+**Model:** `llama-3.1-8b-instant` | **Papers:** 5 QEC papers (1 804 chunks) | **Retrieval:** top-10 → rerank → top-3
+
+| Question | Faithfulness | Relevancy | Context Recall |
+|---|---|---|---|
+| What is quantum error correction? | — | 1.000 | — |
+| What is a stabilizer code? | — | 1.000 | — |
+| How does the surface code correct errors? | — | 0.789 | 0.500 |
+| What is the threshold error rate…? | — | 0.000 | — |
+| What is the distance of a QEC code? | 0.667 | — | — |
+| What is the toric code? | 0.750 | — | — |
+| What are the main types of quantum errors? | 0.714 | — | 0.000 |
+| What is fault-tolerant quantum computing? | 1.000 | — | 0.333 |
+| How does MWPM work in QEC? | 0.250 | — | 0.333 |
+| How does magic state distillation…? | 0.167 | — | 1.000 |
+| **Average** | **0.5913** | **0.6972** | **0.4332** |
+
+> Note: Some cells show `—` where the Groq API returned partial results due to rate-limit constraints (`n > 1` not supported). Averages are computed over the available non-null scores.
+
 ## Author
 
 **Jamson Batista**  

@@ -1,0 +1,167 @@
+{
+  "model": "llama-3.1-8b-instant",
+  "papers": [
+    "fault_tolerant_qec.pdf",
+    "quantum_error_review.pdf",
+    "stabilizer_codes.pdf",
+    "surface_codes.pdf",
+    "topological_codes.pdf"
+  ],
+  "metrics": {
+    "faithfulness": 0.5913,
+    "answer_relevancy": 0.6972,
+    "context_recall": 0.4332
+  },
+  "results": [
+    {
+      "question": "What is quantum error correction?",
+      "ground_truth": "Quantum error correction protects quantum information from errors by encoding it redundantly across multiple physical qubits. Errors are detected by measuring stabilizer operators without disturbing the encoded information, and then corrected based on the resulting syndrome.",
+      "answer": "Based on the provided context, quantum error correction is the process of protecting quantum information from errors caused by noise, which can be due to various sources such as noisy quantum channels, interactions with the environment, or incorrect operations. This involves using control techniques like dynamical decoupling, specialized error-correcting codes such as DFS or phase QECC, and general quantum error-correcting codes to handle errors not eliminated by the first two layers. The goal is to preserve the quantum coherence and maintain the accuracy of quantum information.\n\n[topological_codes.pdf, p.14]\n[stabilizer_codes.pdf, p.2.1]\n[stabilizer_codes.pdf, p.2.8]",
+      "contexts": [
+        "QUANTUM ERROR CORRECTION 15\nlikely, this will include control techniques like dynamica l decoupling as a ﬁrst layer\nof defense, perhaps followed by specialized error-correct ing codes such as a DFS or a\nphase QECC to handle certain dominant error types, with a mor e general quantum\nerror-correcting code as the ﬁnal protection to deal with an y kinds of errors not\neliminated by the ﬁrst two layers. However, everything we do — every qubit we",
+        "CHAPTER 2. BASICS OF QUANTUM ERROR CORRECTION 11\nChapter 2\nBasics of Quantum Error\nCorrection\n2.1 The Quantum Channel\nNow we turn to the quantum channel. A noisy quantum channel ca n be a regular\ncommunications channel which we expect to preserve at least some degree of\nquantum coherence, or it can be the passage of time as a set of q ubits sits\naround, interacting with its environment, or it can be the re sult of operating",
+        "CHAPTER 2. BASICS OF QUANTUM ERROR CORRECTION 14\non one qubit with nothing happening to another. If we have a ch annel in which\nwe are certain some error occurred, we do not need to include the identity as a\npossible error. In any case, the set of correctable errors is unlikely to be a group\n— it does not even need to be closed under multiplication.\nHowever, (2.8) is insuﬃcient to guarantee a code will work as a quantum\nerror-correcting code. When we make a measurement to ﬁnd out about the"
+      ],
+      "scores": {
+        "faithfulness": NaN,
+        "answer_relevancy": 0.9999999999999998,
+        "context_recall": NaN
+      }
+    },
+    {
+      "question": "What is a stabilizer code?",
+      "ground_truth": "A stabilizer code is a quantum error-correcting code defined by a set of commuting Pauli operators called stabilizers. The code space consists of states that are +1 eigenstates of all stabilizer generators. Errors are detected by measuring the stabilizers to obtain a syndrome and corrected accordingly.",
+      "answer": "A stabilizer code is a quantum code that can be described by giving its stabilizer [stabilizer_codes.pdf, p.115]. It is also known as an additive code or a GF(4) code.",
+      "contexts": [
+        "stabilizer code A quantum code that can be described by giving its stabilizer .\nAlso called an additive code or a GF(4) code.\nteleportation A process whereby a quantum state is destroyed and exactly\nreconstructed elsewhere. Quantum teleportation of a singl e qubit requires\none EPR pair shared between the source and destination, and i nvolves two\nmeasurements on the source qubit. The two bits from the measu rements\nmust be classically transmitted to the destination in order to reconstruct",
+        "code, the stabilizer provides a more compact notation for th e coding subspace than\nlisting the basis codewords.\nA representation of stabilizers that is often useful is as a p air of binary matrices,\nfrequently written adjacent with a line between them [ 12]. The ﬁrst matrix has a\n1 everywhere the stabilizer has an X or a Y , and a 0 elsewhere; the second matrix\nhas a 1 where the stabilizer has a Y or a Z. Multiplying together Pauli operators",
+        "CHAPTER 3. STABILIZER CODING 25\nω ), the code is a linear code, which is essentially a classical code over GF(4).\nThe most general quantum code is sometimes called an additive code, because\nthe stabilizer is only closed under sums of its elements. In t his formalism, the\nﬁve-qubit code appears as\n\n\n\n\n1 ω ω 1 0\n0 1 ω ω 1\n1 0 1 ω ω\nω 1 0 1 ω\n\n\n\n . (3.27)\nNote that the ﬁve-qubit code is a linear quantum code.\nAgain, there is an additional condition for a quantum code. D eﬁne the"
+      ],
+      "scores": {
+        "faithfulness": NaN,
+        "answer_relevancy": 1.0,
+        "context_recall": NaN
+      }
+    },
+    {
+      "question": "How does the surface code correct errors?",
+      "ground_truth": "The surface code encodes logical qubits in a 2D lattice using nearest-neighbor X-type and Z-type stabilizer measurements to detect bit-flip and phase-flip errors. Correction is performed classically using minimum weight perfect matching on syndrome measurement outcomes. Errors only need to be corrected when they affect measurement outcomes.",
+      "answer": "According to the provided context, the surface code corrects errors in the following way:\n\n1. Errors only need to be corrected when they affect measurement outcomes.\n2. Errors are identified using classical decoding methods (as described in Section IX of the surface code paper).\n3. Once errors are identified, they can be tracked using the classical control software.\n4. The information obtained from the error identification is used to correct any subsequent measurement outcomes.\n\nSource:\n[surface_codes.pdf, p.3-4, 10]\n\nNote that the correction process is performed entirely in the classical system, not in the quantum system itself. However, it's worth mentioning that the surface code can only correct certain types of errors, and mistakes made during the error correction process can lead to erroneous conclusions about the computational result.",
+      "contexts": [
+        "feature of the surface code is that errors only need to be\ncorrected when they aﬀect measurement outcomes, and\nthus one merely needs to identify errors, and then cor-\nrect any measurements that are aﬀected by these errors.\nThis can be done entirely in the classical system used to\ncontrol the surface code, as we describe in Section IX.\nFor example, a ˆZ phase-ﬂip error that is detected imme-\ndiately can be corrected by changing the sign of any sub-",
+        "11\ncalled error chains .\nThe surface code can deal with all these errors as long\nas the errors that occur during each surface code cycle\ncan be identiﬁed (i.e. decoding which speciﬁc error(s)\noccurred on which particular qubit(s)). 12 Once iden-\ntiﬁed, these errors can be tracked and the information\nused to correct any subsequent measurement outcomes\nusing the classical control software. Edmonds’ minimum-\nweight perfect-matching algorithm [43, 44] provides an",
+        "density increases. If mistakes are made in backing out\nthe qubit errors, these mistakes will result in erroneous\nconclusions about the computational result. Ultimately\nthis limits the surface code’s ability to handle errors.\nWe will return to this discussion after introducing the\nsurface code logical operators.\nVI. LOGICAL OPERA TORS\nHow does one perform quantum logic in the surface\ncode? It may appear that the surface code completely\nstabilizes the 2D array, and that it therefore locks the"
+      ],
+      "scores": {
+        "faithfulness": NaN,
+        "answer_relevancy": 0.7888390632788114,
+        "context_recall": 0.5
+      }
+    },
+    {
+      "question": "What is the threshold error rate for fault-tolerant quantum computing?",
+      "ground_truth": "The fault-tolerance threshold is the physical error rate below which quantum error correction can suppress logical errors arbitrarily. For the surface code this threshold is approximately 1%, meaning physical gate error rates must be below roughly 1% for error correction to be beneficial.",
+      "answer": "Unfortunately, the given context does not explicitly state the threshold error rate for fault-tolerant quantum computing. It mentions that there is a constant threshold value below which it is possible to make the logical quantum computation arbitrarily close to correct, but it does not specify the exact value.\n\nSource: [topological_codes.pdf, p.16]",
+      "contexts": [
+        "these tasks is called fault tolerant (FT for short). Shor presented the ﬁrst protocols\nfor fault-tolerant quantum computation [ 44], but there have been some substantial\nimprovements since then. Now we know that, provided that the physical error rate\nper gate and per time step is below some constant threshold va lue, it is possible\nto make the logical quantum computation we wish to perform ar bitrarily close to\ncorrect with overhead that is polylogarithmic in the length of the computation [ 1,",
+        "build a quantum computer which behaves correctly in the pres ence of errors, we\nalso need a theory of fault-tolerant quantum computation, i nstructing us how\nto perform quantum gates on qubits which are encoded in a quan tum error-\ncorrecting code. The threshold theorem states that it is pos sible to create a\nquantum computer to perform an arbitrary quantum computati on provided\nthe error rate per physical gate or time step is below some con stant threshold\nvalue.",
+        "39–44; E. Knill, Fault-tolerant Postselected Quantum Computation: Scheme s, arXiv:\nquant-ph/0402171.\n[31] E. Knill and R. Laﬂamme, A theory of quantum error-correcting codes , Phys. Rev. A 55\n(1997), 900–911; arXiv:quant-ph/9604034.\n[32] E. Knill, R. Laﬂamme, and W. H. Zurek, Threshold accuracy for quantum computation ,\narXiv:quant-ph/9610011; E. Knill, R. Laﬂamme, and W. H. Zur ek, Resilient quantum com-\nputation, Science 279 (1998), 342–345; E. Knill, R. Laﬂamme, and W. H. Zurek, Resilient"
+      ],
+      "scores": {
+        "faithfulness": NaN,
+        "answer_relevancy": 0.0,
+        "context_recall": NaN
+      }
+    },
+    {
+      "question": "What is the distance of a quantum error-correcting code?",
+      "ground_truth": "The distance d of a quantum error-correcting code is the minimum weight of a logical operator not detectable by the stabilizers. A distance-d code can detect errors on up to d-1 qubits and correct errors on up to floor((d-1)/2) qubits.",
+      "answer": "A quantum error-correcting code to correct up to t errors must have a distance of at least 2t + 1. This is also referred to as the quantum Hamming bound. Every code has a distance of at least one.\n\n[stabilizer_codes.pdf: p. 22]\n[topological_codes.pdf: p. 6]",
+      "contexts": [
+        "the distance of the code. A quantum code to correct up to t errors must have\ndistance at least 2 t + 1. Every code has distance at least one. A distance d\ncode encoding k qubits in n qubits is described as an [ n,k,d ] code. Note that a\nquantum [n,k,d ] code is often written in the literature as [[ n,k,d ]] to distinguish\nit from a classical [n,k,d ] code. I have chosen the notation [ n,k,d ] to emphasize\nthe similarities with the classical theory; when I need to di stinguish, I will do",
+        "fewer places. This inequality is called the quantum Hamming bound . While the\nquantum Hamming bound only applies to nondegenerate codes, we do not know of\nany codes that beat it.\nFort = 1, k = 1, the quantum Hamming bound tells us n≥5. In fact, there\nis a code with n = 5, which you will see later. A code that corrects t errors is said\nto have distance 2t + 1, because it takes 2 t + 1 single-qubit changes to get from\none codeword to another. We can also deﬁne distance as the min imum weight of",
+        "CHAPTER 7. BOUNDS ON QUANTUM CODES 72\nChapter 7\nBounds on Quantum\nError-Correcting Codes\n7.1 General Bounds\nThe question of how eﬃcient an error-correcting code of a giv en block size can\nbe made in terms of both encoded qubits and distance is an inte resting and im-\nportant question in the theories of both classical and quant um error correction.\nIn the classical theory, only upper and lower bounds exist on the eﬃciency of"
+      ],
+      "scores": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": NaN,
+        "context_recall": NaN
+      }
+    },
+    {
+      "question": "What is the toric code?",
+      "ground_truth": "The toric code is a topological quantum error-correcting code defined on a 2D torus where qubits sit on edges of a lattice. Stabilizers are vertex operators (X-type) and plaquette operators (Z-type). It can correct any error pattern lighter than half the system size along any non-trivial cycle.",
+      "answer": "The toric code is a quantum error-correcting code that evolved from an invention of Alexei Kitaev. It is designed using qubits distributed on the surface of a toroid (a doughnut-shaped object), but this geometry turned out to be unnecessary, and a planar version (surface code) was developed instead [surface_codes.pdf, p.0].\n\nReferences:\n[8, 9, 11-14]\n\nPlease note that for more detailed information on the toric code, it would be best to consult the specific papers referenced in the provided context, [surface_codes.pdf, p.0] and [8, 9, 11-14].",
+      "contexts": [
+        "forms much better than the individual physical qubits.\nOne approach to building a quantum computer is\nbased on surface codes [8, 9], operated as stabilizer codes\n[10]. The surface codes evolved from an invention of\nAlexei Kitaev known as toric codes [11–14], which arose\nfrom his eﬀorts to develop simple models for topological\norder, using qubits distributed on the surface of a toroid.\nThe toroidal geometry employed by Kitaev turned out\nto be unnecessary, and planar versions (thus “surface",
+        "some threshhold.\nCSS code Short for Calderbank-Shor-Steane code. A CSS code is formed from\ntwo classical error-correcting codes. CSS codes can easily take advantage\nof results from the theory of classical error-correcting co des and are also\nwell-suited for fault-tolerant computation. See sections 3.3 and 8.6.\ncyclic code A code that is invariant under cyclic permutations of the qub its.\ndecoherence The process whereby a quantum system interacts with its envi -",
+        "code. They each have advantages and are useful in diﬀerent ci rcumstances.\nThe description I have used so far uses the language of ﬁnite g roup theory and\nis particularly useful for making contact with the usual lan guage of quantum\nmechanics. This is the form presented in [21].\nWe can instead write the stabilizer using binary vector spac es, as in [22],\nwhich emphasizes connections with the classical theory of e rror-correcting codes."
+      ],
+      "scores": {
+        "faithfulness": 0.75,
+        "answer_relevancy": NaN,
+        "context_recall": NaN
+      }
+    },
+    {
+      "question": "What are the main types of quantum errors?",
+      "ground_truth": "The main quantum error types are bit-flip (X) errors, phase-flip (Z) errors, and combined bit-and-phase-flip (Y) errors. Any single-qubit error can be decomposed into Pauli X, Y, Z components, so correcting these three types is sufficient for general single-qubit error correction.",
+      "answer": "Although the context doesn't provide a comprehensive list of the main types of quantum errors, it suggests that single-qubit errors can be described by the operator model and include at least errors corresponding to operators ˆZ, which when applied an even number of times, results in an identity operator ˆI ([surface_codes.pdf, p.3-4]). Ref. [42] is also mentioned as providing more information about this range of errors.",
+      "contexts": [
+        "QUANTUM ERROR CORRECTION 15\nlikely, this will include control techniques like dynamica l decoupling as a ﬁrst layer\nof defense, perhaps followed by specialized error-correct ing codes such as a DFS or a\nphase QECC to handle certain dominant error types, with a mor e general quantum\nerror-correcting code as the ﬁnal protection to deal with an y kinds of errors not\neliminated by the ﬁrst two layers. However, everything we do — every qubit we",
+        "qubits.\nThe problem of eliminating errors from a quantum computer is a diﬃcult one,\nand we will want to use every tool that we can bring to bear on th e problem. Most",
+        "operators will be correspondingly small. This modeling\nof errors can describe a quite wide range of single-qubit\nerrors; see e.g. Ref. [42].\nThe operator model for single-qubit errors implies that\nthese errors can, in principle, be undone by quantum cor-\nrection gates: An erroneous ˆZ can be canceled by sub-\nsequently applying an intentional ˆZ, since ˆZ 2 = ˆI. If\nwe detect all the errors, we can correct them by repeat-\nedly applying quantum correction gates. However, one"
+      ],
+      "scores": {
+        "faithfulness": 0.7142857142857143,
+        "answer_relevancy": NaN,
+        "context_recall": 0.0
+      }
+    },
+    {
+      "question": "What is fault-tolerant quantum computing?",
+      "ground_truth": "Fault-tolerant quantum computing performs reliable computations despite physical qubit and gate errors. It requires that errors introduced at each computational step do not propagate catastrophically, achieved via quantum error-correcting codes and fault-tolerant gate implementations such that errors remain correctable.",
+      "answer": "Fault-tolerant quantum computing refers to the ability to execute many quantum algorithms of practical interest despite errors in noisy quantum hardware. It involves identifying and correcting errors, thereby ensuring that the logical quantum computation is arbitrarily close to correct. \n\nAs mentioned in [quantum_error_review.pdf, p.0], it is widely believed that a fault-tolerant architecture will be required to execute many quantum algorithms. \n\nAdditionally, according to [topological_codes.pdf, p.16], fault-tolerant quantum computation can proceed using only entangling gates between neighborly qubits due to the locality of certain quantum error-correcting codes. \n\nSource: \n[quantum_error_review.pdf, p.0-1]\n[topological_codes.pdf, p.16]\n[Reference 1: Not explicitly specified, but could be from the context in [quantum_error_review.pdf, p.0]]",
+      "contexts": [
+        "I. INTRODUCTION\nQuantum computing devices are now capable of out-\nperforming even the fastest conventional supercomputers\nat certain tasks [1]. However, to execute many quantum\nalgorithms of practical interest, it is widely believed that\na fault-tolerant architecture will be required to identify\nand correct errors in noisy quantum hardware. Fault-\ntolerant architectures come with a signiﬁcant overhead\ncost, using a large number of low-noise physical qubits",
+        "tolerant quantum computers.\nThe enormous resource estimates mentioned above are\nall obtained using fault-tolerant architectures based on\nquantum error-correcting codes with local check opera-\ntors [9–12]. These codes have a number of highly desir-\nable features for quantum computation, including high\nthresholds and fast decoders [5, 13]. The locality of\nthese codes means that quantum error correction can\nproceed using only entangling gates between neighbour-",
+        "these tasks is called fault tolerant (FT for short). Shor presented the ﬁrst protocols\nfor fault-tolerant quantum computation [ 44], but there have been some substantial\nimprovements since then. Now we know that, provided that the physical error rate\nper gate and per time step is below some constant threshold va lue, it is possible\nto make the logical quantum computation we wish to perform ar bitrarily close to\ncorrect with overhead that is polylogarithmic in the length of the computation [ 1,"
+      ],
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": NaN,
+        "context_recall": 0.3333333333333333
+      }
+    },
+    {
+      "question": "How does minimum weight perfect matching work in quantum error correction?",
+      "ground_truth": "Minimum weight perfect matching (MWPM) is a classical decoding algorithm for surface codes. It takes syndrome measurement outcomes—locations where stabilizer measurements flip sign—and finds the lowest-weight pairing of defects. The corresponding error pattern is then applied as a correction.",
+      "answer": "According to surface_codes.pdf, p.10, Edmonds' minimum-weight perfect-matching algorithm is cited as a solution to identify and correct errors in surface codes.\n\nHowever, for a more in-depth explanation of the algorithm in the context of quantum error correction, it's necessary to consult other sources. A search in the given sources reveals a discussion of the algorithm in the context of quantum error correction in Kribs [33].",
+      "contexts": [
+        "11\ncalled error chains .\nThe surface code can deal with all these errors as long\nas the errors that occur during each surface code cycle\ncan be identiﬁed (i.e. decoding which speciﬁc error(s)\noccurred on which particular qubit(s)). 12 Once iden-\ntiﬁed, these errors can be tracked and the information\nused to correct any subsequent measurement outcomes\nusing the classical control software. Edmonds’ minimum-\nweight perfect-matching algorithm [43, 44] provides an",
+        "QUANTUM ERROR CORRECTION 45\nquantum computation: error models and thresholds , Proc. Royal Soc. London A 454 (1998),\n365–384, arXiv:quant-ph/9702058.\n[33] D. W. Kribs, R. Laﬂamme, D. Poulin, M. Lesosky, Operator quantum error correction, Quant.\nInf. Comp. 6 (2006), 383–399; arXiv:quant-ph/0504189.\n[34] R. Laﬂamme, C. Miquel, J. P. Paz, and W. Zurek, Perfect quantum error correction code ,\nPhys. Rev. Lett. 77 (1996), 198–201; arXiv:quant-ph/9602019.",
+        "quantum error correction can lead to better codes,” quant-p h/9704002\n(1997).\n[21] D. Gottesman, “Class of quantum error-correcting code s saturating the\nquantum Hamming bound,” Phys. Rev. A 54, 1862 (1996).\n[22] A. R. Calderbank, E. M. Rains, P. W. Shor, and N. J. A. Sloa ne, “Quantum\nerror correction and orthogonal geometry,” Phys. Rev. Lett . 78, 405 (1997).\n[23] E. Rains, “Quantum shadow enumerators,” quant-ph/961 1001 (1996)."
+      ],
+      "scores": {
+        "faithfulness": 0.25,
+        "answer_relevancy": NaN,
+        "context_recall": 0.3333333333333333
+      }
+    },
+    {
+      "question": "How does magic state distillation enable universal quantum computation?",
+      "ground_truth": "Magic state distillation produces high-fidelity non-Clifford resource states (magic states) by consuming many noisy copies and distilling them into fewer higher-quality ones. These magic states are then injected into fault-tolerant circuits via gate teleportation to implement non-Clifford gates like the T gate, enabling universal quantum computation on top of the Clifford group.",
+      "answer": "Magic state distillation enables universal quantum computation when used in conjunction with the Cliﬀord gate set (Cliﬀord, 2000 [30]) by providing a way to distill or purify a magic state, specifically the T gate. This is demonstrated in \"Improved magic states distillation for quantum universality\" (Bravyi & Kitaev, 2005 [40]) and also mentioned in [quantum_error_review.pdf, p.2] and [topological_codes.pdf, p.44].\n\nAccording to the Cliﬀord and Brassard paper which is not available in our provided context but the provided [quantum_error_review.pdf, p.11] indicates that the Cliﬀord gate set can be supplemented with magic-state distillation and state injection to achieve universal quantum computing.",
+      "contexts": [
+        "12\nIII. DISCUSSION\nWe have shown that it is possible to use LDPC codes\nto achieve fault-tolerant quantum computing with over-\nheads favourable to surface code schemes, even at reason-\nable scales. Our scheme uses a generalized form of lattice\nsurgery, which when coupled with magic-state distillation\ncan implement universal quantum computing.\nOur construction highlights parallelism as a key con-\nstraint in maintaining low overheads, and we note that",
+        "Cliﬀord gate set [30]. This gate set can be supplemented\nwith magic state distillation and state injection to achieve\nuniversal quantum computing [50]. We will discuss uni-",
+        "arXiv:quant-ph/0406025.\n[40] , Improved magic states distillation for quantum universali ty, Quant. Inf. Proc. 4\n(2005), 251–264; arXiv:quant-ph/0411036.\n[41] , Fault-tolerance threshold for a distance-three quantum code, arXiv:quant-ph/0509203\n(2005).\n[42] , Error-Detection-Based Quantum Fault Tolerance Against Di screte Pauli Noise ,\nBerkeley Ph.D. thesis (1996); arXiv:quant-ph/0612004.\n[43] P. W. Shor, Scheme for reducing decoherence in quantum memory , Phys. Rev. A 52 (1995),\n2493–2496."
+      ],
+      "scores": {
+        "faithfulness": 0.16666666666666666,
+        "answer_relevancy": NaN,
+        "context_recall": 1.0
+      }
+    }
+  ]
+}
