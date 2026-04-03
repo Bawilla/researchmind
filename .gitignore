@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+
+# Vector stores
+chroma_db/
+chroma_db2/
+chroma_db3/
+chroma_db4/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables
+.env
+
+# Test PDF (download separately)
+paper.pdf
+
+# Claude metadata
+.claude/

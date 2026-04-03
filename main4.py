@@ -1,0 +1,238 @@
+import os
+import re
+from pathlib import Path
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from sentence_transformers import CrossEncoder
+from groq import Groq
+
+PAPERS_DIR = "./papers"
+CHROMA_DIR = "./chroma_db4"
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+GROQ_MODEL = "llama-3.1-8b-instant"
+RETRIEVAL_K = 10    # candidates fetched from ChromaDB
+RERANK_TOP_N = 3    # chunks passed to LLM after reranking
+MEMORY_TURNS = 4    # past exchanges kept in context window (each = 1 user + 1 assistant)
+
+SYSTEM_PROMPT = (
+    "You are a helpful research assistant specialising in quantum computing and quantum error correction. "
+    "You have access to retrieved context from scientific papers for each question. "
+    "Use the provided context to answer accurately. Cite source filenames and page numbers for key claims. "
+    "You also have access to the conversation history — use it to resolve follow-up questions, "
+    "pronouns, and references to earlier answers. "
+    "If the context does not contain enough information, say so clearly."
+)
+
+
+# ---------------------------------------------------------------------------
+# Indexing (identical to main3.py, only CHROMA_DIR differs)
+# ---------------------------------------------------------------------------
+
+def infer_title(filename: str) -> str:
+    return Path(filename).stem.replace("_", " ").replace("-", " ").title()
+
+
+def load_all_papers(papers_dir: str) -> list:
+    pdf_files = sorted(Path(papers_dir).glob("*.pdf"))
+    if not pdf_files:
+        raise FileNotFoundError(f"No PDFs found in {papers_dir}/")
+
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    all_chunks = []
+
+    for pdf_path in pdf_files:
+        print(f"  Loading {pdf_path.name} ...", end=" ", flush=True)
+        loader = PyPDFLoader(str(pdf_path))
+        pages = loader.load()
+        for page in pages:
+            page.metadata["source"] = pdf_path.name
+            page.metadata["title"] = infer_title(pdf_path.name)
+        chunks = splitter.split_documents(pages)
+        all_chunks.extend(chunks)
+        print(f"{len(pages)} pages → {len(chunks)} chunks")
+
+    return all_chunks
+
+
+def build_or_load_vectorstore(embeddings: HuggingFaceEmbeddings) -> Chroma:
+    if os.path.exists(CHROMA_DIR) and os.listdir(CHROMA_DIR):
+        print(f"Loading existing ChromaDB from {CHROMA_DIR}...")
+        vs = Chroma(persist_directory=CHROMA_DIR, embedding_function=embeddings)
+        print(f"  Loaded {vs._collection.count()} chunks\n")
+        return vs
+
+    print(f"Indexing all PDFs in {PAPERS_DIR}/...")
+    chunks = load_all_papers(PAPERS_DIR)
+    print(f"\nEmbedding {len(chunks)} total chunks into {CHROMA_DIR}/ ...")
+    vs = Chroma.from_documents(
+        documents=chunks,
+        embedding=embeddings,
+        persist_directory=CHROMA_DIR,
+    )
+    print(f"  Done — {vs._collection.count()} chunks stored.\n")
+    return vs
+
+
+# ---------------------------------------------------------------------------
+# Metadata filter parsing
+# ---------------------------------------------------------------------------
+_FILTER_PATTERNS = [
+    r"what does ([a-zA-Z0-9_\-]+\.pdf) say about (.+)",
+    r"according to ([a-zA-Z0-9_\-]+\.pdf)[,\s]+(.+)",
+    r"in ([a-zA-Z0-9_\-]+\.pdf)[,\s]+(.+)",
+]
+
+
+def parse_filter(question: str):
+    for pattern in _FILTER_PATTERNS:
+        m = re.search(pattern, question, re.IGNORECASE)
+        if m:
+            return m.group(2).strip("?. "), {"source": m.group(1)}
+    return question, None
+
+
+# ---------------------------------------------------------------------------
+# Retrieval + reranking
+# ---------------------------------------------------------------------------
+def retrieve_and_rerank(
+    question: str,
+    vectorstore: Chroma,
+    reranker: CrossEncoder,
+    where_filter: dict | None,
+):
+    """Return (top_docs, scored_list, filter_note)."""
+    if where_filter:
+        candidates = vectorstore.similarity_search(
+            question, k=RETRIEVAL_K, filter=where_filter
+        )
+        filter_note = f" | filtered to {where_filter['source']}"
+    else:
+        candidates = vectorstore.similarity_search(question, k=RETRIEVAL_K)
+        filter_note = ""
+
+    if not candidates:
+        return [], [], filter_note
+
+    pairs = [[question, doc.page_content] for doc in candidates]
+    scores = reranker.predict(pairs)
+    scored = sorted(zip(scores, candidates), key=lambda x: x[0], reverse=True)
+    top_docs = [doc for _, doc in scored[:RERANK_TOP_N]]
+    return top_docs, scored, filter_note
+
+
+# ---------------------------------------------------------------------------
+# Core QA with memory
+# ---------------------------------------------------------------------------
+def answer_question(
+    client: Groq,
+    vectorstore: Chroma,
+    reranker: CrossEncoder,
+    question: str,
+    history: list,          # mutated in-place: history of plain Q&A turns
+) -> None:
+    clean_q, where_filter = parse_filter(question)
+
+    # Stage 1+2 — retrieve and rerank
+    top_docs, scored, filter_note = retrieve_and_rerank(
+        clean_q, vectorstore, reranker, where_filter
+    )
+
+    if not top_docs:
+        print("\n[No candidates found — try a different question or filename.]\n")
+        return
+
+    # Stage 3 — build context with inline citations
+    context_parts = []
+    for doc in top_docs:
+        src = doc.metadata.get("source", "unknown")
+        page = doc.metadata.get("page", "?")
+        context_parts.append(f"[{src}, p.{page}]\n{doc.page_content}")
+    context = "\n\n".join(context_parts)
+
+    # Stage 4 — build message list: system + last N exchanges + current question
+    # History stores plain Q&A (without injected context) so it stays concise.
+    recent_history = history[-(MEMORY_TURNS * 2):]  # last 4 exchanges = 8 messages
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        *recent_history,
+        {
+            "role": "user",
+            "content": (
+                f"Retrieved context for this question:\n{context}"
+                f"\n\nQuestion: {clean_q}"
+            ),
+        },
+    ]
+
+    response = client.chat.completions.create(model=GROQ_MODEL, messages=messages)
+    answer = response.choices[0].message.content
+
+    # Stage 5 — update memory with plain exchange (no context blob)
+    history.append({"role": "user", "content": question})
+    history.append({"role": "assistant", "content": answer})
+
+    sources = sorted({doc.metadata.get("source", "?") for doc in top_docs})
+    exchanges = len(history) // 2   # each exchange = 1 user + 1 assistant
+
+    print(f"\nAnswer:\n{answer}")
+    print(f"\n[sources: {', '.join(sources)}{filter_note}]")
+
+    # Reranking score table
+    print(f"\n{'─'*64}")
+    print(
+        f"  Reranking  (fetched {min(RETRIEVAL_K, len(scored))} → kept top {RERANK_TOP_N})"
+        f"  |  memory: {exchanges}/{MEMORY_TURNS} exchange(s) stored"
+    )
+    print(f"{'─'*64}")
+    for rank, (score, doc) in enumerate(scored[:RERANK_TOP_N], 1):
+        src = doc.metadata.get("source", "?")
+        page = doc.metadata.get("page", "?")
+        snippet = doc.page_content[:80].replace("\n", " ")
+        print(f"  #{rank}  score={score:+.4f}  [{src}, p.{page}]")
+        print(f"       \"{snippet}...\"")
+    print(f"{'─'*64}\n")
+
+
+def main():
+    if not os.path.exists(PAPERS_DIR):
+        print(f"ERROR: {PAPERS_DIR}/ folder not found.")
+        return
+
+    print("Loading embedding model...")
+    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    vectorstore = build_or_load_vectorstore(embeddings)
+
+    print(f"Loading reranker: {RERANKER_MODEL} ...")
+    reranker = CrossEncoder(RERANKER_MODEL)
+    print("  Ready.\n")
+
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+    history: list = []   # grows each turn, trimmed inside answer_question
+
+    print("ResearchMind + Reranker + Memory — type 'exit' or 'quit' to stop.")
+    print(f"Retrieval: top-{RETRIEVAL_K} ChromaDB → rerank → top-{RERANK_TOP_N} to LLM")
+    print(f"Memory: last {MEMORY_TURNS} exchanges included in every prompt")
+    print("Tip: prefix with 'what does <file>.pdf say about' to filter by paper.\n")
+
+    while True:
+        try:
+            question = input("Question: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            break
+
+        if not question:
+            continue
+        if question.lower() in {"exit", "quit"}:
+            print("Goodbye!")
+            break
+
+        answer_question(client, vectorstore, reranker, question, history)
+
+
+if __name__ == "__main__":
+    main()
